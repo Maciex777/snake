@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 	<head>
@@ -33,6 +32,28 @@
 			function init(){
 				var canvas = document.querySelector("#canvas");
 				var ctx = canvas.getContext("2d");
+
+				function Obstacle(ctx, canvas) {
+					this.canvas = canvas;
+					this.ctx = ctx;
+					this.size = 25;
+					this.onBoard = false;
+					this.x = 0;
+					this.y = 0;
+					this.randomize = function() {
+						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
+						this.y = Math.floor(Math.random() * (this.canvas.height/this.size));
+					};
+
+					this.drawObstacle = function() {
+						this.ctx.fillStyle = "grey";
+						this.ctx.beginPath();
+						this.ctx.rect(this.x*this.size,this.y*this.size,this.size,this.size);
+						this.ctx.fill();
+						this.ctx.closePath();
+						this.ctx.fillStyle = "black";
+					};
+				}
 
 				function Apple(ctx, canvas) {
 					this.canvas = canvas;
@@ -132,9 +153,6 @@
 										that.direction = "down";
 									}
 									break;
-								case 32 /*spacja*/:
-
-									break;
 							}
 						};
 					};
@@ -153,7 +171,7 @@
 						};
 					};
 
-					this.checkColissions = function(appleX,appleY){
+					this.checkColissions = function(appleX,appleY,obstacleX,obstacleY){
 						var sneakHead = this.bodyPartsHolder[this.bodyParts-1];
 						if(sneakHead.x*this.size >= canvas.width){
 							sneakHead.x = 0
@@ -169,8 +187,12 @@
 						}
 						if(sneakHead.x == appleX && sneakHead.y == appleY){
 							this.eaten = true;
+							console.log(obstacleY);
 						}
-
+						if(sneakHead.x == obstacleX && sneakHead.y == obstacleY){
+							this.alive = false;
+							console.log("DEAD");
+						}
 						for(var i = 0; i < this.bodyPartsHolder.length-1; i++){
 							if(sneakHead.x == this.bodyPartsHolder[i].x && sneakHead.y == this.bodyPartsHolder[i].y){
 								this.alive = false;
@@ -184,7 +206,7 @@
 					};
 				}
 
-				
+			
 				function Game(canvas, ctx){
 
 					var that = this;
@@ -195,7 +217,9 @@
 					this.state = "New";
 					this.snake = new Snake(this.ctx, this.canvas);
 					this.apple = new Apple(this.ctx, this.canvas);
+					this.obstacle = new Obstacle(this.ctx, this.canvas);
 					this.appleCorrect = true;
+					this.obstacleCorrect = true;
 					this.score = 0;
 
 					this.drawWelcome = function() {
@@ -224,6 +248,26 @@
 								that.snake.eaten = false;
 							}
 							
+								that.ctx.clearRect(0,0,that.canvas.width,that.canvas.height);
+							
+
+							if(that.obstacle.onBoard) {
+								that.obstacle.drawObstacle();
+							} else {
+								do {
+									that.obstacleCorrect = true;
+									that.obstacle.randomize();
+							for(var k = 0; k < that.snake.bodyPartsHolder.length; k++){
+								if(that.obstacle.x == that.snake.bodyPartsHolder[k].x && that.obstacle.y == that.snake.bodyPartsHolder[k].y ){
+									that.obstacleCorrect = false;
+									break;
+								}
+							}
+						} while(!(that.obstacleCorrect));
+
+						that.obstacle.onBoard = true;
+						that.obstacle.drawObstacle();
+						}
 
 							if(that.apple.onBoard) {
 								that.apple.drawApple();
@@ -233,8 +277,12 @@
 									that.apple.randomize();
 									for(var i = 0; i < that.snake.bodyPartsHolder.length; i++){
 										if(that.apple.x == that.snake.bodyPartsHolder[i].x && that.apple.y == that.snake.bodyPartsHolder[i].y ){
+											for(var j = 0; j < that.obstacle.size.length; j++){
+												if(that.apple.x == that.obstacle.size[j].x && that.apple.y == that.obstacle.size[j].y ){
 													that.appleCorrect = false;
 													break;
+												}
+											}
 										}
 									}
 								} while(!(that.appleCorrect));
@@ -243,6 +291,10 @@
 								that.apple.drawApple();
 							}
 							if(that.snake.alive){
+									that.snake.moveSnake();
+									that.snake.checkColissions(that.apple.x,that.apple.y,that.obstacle.x,that.obstacle.y);
+									console.log(that.apple.x,that.apple.y,that.obstacle.x,that.obstacle.y);
+							
 							} else {
 								that.ctx.font = "50px serif";
 								that.ctx.fillStyle = "red";
@@ -257,7 +309,6 @@
 							}
 						},this.snake.speed);
 					};
-					
 					this.init = function() {
 						switch(this.state){
 							case "New":
@@ -275,6 +326,7 @@
 										that.snake = null;
 										that.snake = new Snake(that.ctx, that.canvas);
 										that.apple = new Apple(that.ctx, that.canvas);
+										that.obstacle = new Obstacle(that.ctx, that.canvas);
 										that.state = "New";
 										that.init();
 										break;
