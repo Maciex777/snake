@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -7,6 +8,7 @@
 			canvas {
 				border: 1px solid black;
 				float:left;
+				margin: 30px;
 			}
 			#panel{
 				float:left;
@@ -17,178 +19,276 @@
 			}
 		</style>
 	</head>
-	<body onload="init()">
+	<body>
 		<canvas width="600" height="600" id="canvas">
 
 		</canvas>
 
 		<div id="panel">
 			<h2>Your score: <span id="score">0</span></h2>
-				<label for="applePoints">Amount of points for apple:</label>
-				<input type="number" id="applePoints" name="applePoints" min="1" max="20" value="5">
+
+			<button onclick="init()">Start</button>
 		</div>
 		<script type="text/javascript">
 			function init(){
 				var canvas = document.querySelector("#canvas");
 				var ctx = canvas.getContext("2d");
-				
+
+				function Apple(ctx, canvas) {
+					this.canvas = canvas;
+					this.ctx = ctx;
+					this.size = 25;
+					this.onBoard = false;
+					this.x = 0;
+					this.y = 0;
+					
+					this.scoreValue = 5;
+
+					this.randomize = function() {
+						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
+						this.y = Math.floor(Math.random() * (this.canvas.height/this.size));
+					};
+
+					this.drawApple = function() {
+						this.ctx.fillStyle = "green";
+						this.ctx.beginPath();
+						this.ctx.rect(this.x*this.size,this.y*this.size,this.size,this.size);
+						this.ctx.fill();
+						this.ctx.closePath();
+						this.ctx.fillStyle = "black";
+					};
+				}
+
 				function Snake(ctx, canvas) {
-	var that = this;
-	this.canvas = canvas;
-	this.ctx = ctx;
-	this.speed = 150;
-	this.size = 25;
-	this.bodyParts= 8;
-	this.bodyPartsHolder = [];
-	this.direction = "right";
-	this.alive = true;
+					var that = this;
+					this.canvas = canvas;
+					this.ctx = ctx;
+					this.speed = 150;
+					this.size = 25;
+					this.bodyParts= 8;
+					this.bodyPartsHolder = [];
+					this.direction = "right";
+					this.alive = true;
+					this.eaten = false;
 
-	this.initSnake = function(){
-		for (var i=0; i < this.bodyParts; i++) {
-		  this.bodyPartsHolder.push({x:i,y:0});
-		};
-		this.makeSnakeListen(window);
+					this.initSnake = function(){
+						for (var i=0; i < this.bodyParts; i++) {
+						  this.bodyPartsHolder.push({x:i,y:0});
+						};
+						this.makeSnakeListen(window);
 
-	};
+					};
 
-	this.updatePosition = function(){
-		var tempx = this.bodyPartsHolder[this.bodyParts-1].x;
-		var tempy = this.bodyPartsHolder[this.bodyParts-1].y;
-		var prevX = tempx;
-		var prevY = tempy;
-		switch(this.direction){
-			case "right":
-				this.bodyPartsHolder[this.bodyParts-1].x++;
-				break;
-			case "down":
-				this.bodyPartsHolder[this.bodyParts-1].y++;
-				break;
-			case "left":
-				this.bodyPartsHolder[this.bodyParts-1].x--;
-				break;
-			case "up":
-				this.bodyPartsHolder[this.bodyParts-1].y--;
-				break;
-		}
+					this.updatePosition = function(){
+						var tempx = this.bodyPartsHolder[this.bodyParts-1].x;
+						var tempy = this.bodyPartsHolder[this.bodyParts-1].y;
+						var prevX = tempx;
+						var prevY = tempy;
+						switch(this.direction){
+							case "right":
+								this.bodyPartsHolder[this.bodyParts-1].x++;
+								break;
+							case "down":
+								this.bodyPartsHolder[this.bodyParts-1].y++;
+								break;
+							case "left":
+								this.bodyPartsHolder[this.bodyParts-1].x--;
+								break;
+							case "up":
+								this.bodyPartsHolder[this.bodyParts-1].y--;
+								break;
+						}
 
-		for(var i = this.bodyParts-2; i>=0;i--) {
-			tempx = this.bodyPartsHolder[i].x;
-			tempy = this.bodyPartsHolder[i].y;
-			this.bodyPartsHolder[i].x = prevX;
-			this.bodyPartsHolder[i].y = prevY;
-			prevX = tempx;
-			prevY = tempy;
-		}
-	};
+						for(var i = this.bodyParts-2; i>=0;i--) {
+							tempx = this.bodyPartsHolder[i].x;
+							tempy = this.bodyPartsHolder[i].y;
+							this.bodyPartsHolder[i].x = prevX;
+							this.bodyPartsHolder[i].y = prevY;
+							prevX = tempx;
+							prevY = tempy;
+						}
+					};
 
-	this.makeSnakeListen = function (window){
-		window.onkeydown = function(e){
-			switch(e.keyCode){
-				case 37:
-					if(that.direction != "right"){
-						that.direction = "left";
-					}
-					break;
-				case 38:
-					if(that.direction != "down"){
-						that.direction = "up";
-					}
-					break;
-				case 39:
-					if(that.direction != "left"){
-						that.direction = "right";
-					}
-					break;
-				case 40:
-					if(that.direction != "up"){
-						that.direction = "down";
-					}
-					break;
-			}
-		};
-	};
+					this.makeSnakeListen = function (window){
+						window.onkeydown = function(e){
+							switch(e.keyCode){
+								case 37:
+									if(that.direction != "right"){
+										that.direction = "left";
+									}
+									break;
+								case 38:
+									if(that.direction != "down"){
+										that.direction = "up";
+									}
+									break;
+								case 39:
+									if(that.direction != "left"){
+										that.direction = "right";
+									}
+									break;
+								case 40:
+									if(that.direction != "up"){
+										that.direction = "down";
+									}
+									break;
+								case 32 /*spacja*/:
 
-	this.moveSnake = function(){
-		this.drawSnake();
-		this.updatePosition();
-	};
+									break;
+							}
+						};
+					};
 
-	this.drawSnake = function(){
-		for(var i=0; i < this.bodyParts; i++) {
-			this.ctx.beginPath();
-			this.ctx.rect(this.bodyPartsHolder[i].x*this.size,this.bodyPartsHolder[i].y*this.size,this.size,this.size);
-			this.ctx.fill();
-			this.ctx.closePath();
-		};
-	};
-}
+					this.moveSnake = function(){
+						this.drawSnake();
+						this.updatePosition();
+					};
 
+					this.drawSnake = function(){
+						for(var i=0; i < this.bodyParts; i++) {
+							this.ctx.beginPath();
+							this.ctx.rect(this.bodyPartsHolder[i].x*this.size,this.bodyPartsHolder[i].y*this.size,this.size,this.size);
+							this.ctx.fill();
+							this.ctx.closePath();
+						};
+					};
 
+					this.checkColissions = function(appleX,appleY){
+						var sneakHead = this.bodyPartsHolder[this.bodyParts-1];
+						if(sneakHead.x*this.size >= canvas.width){
+							sneakHead.x = 0
+						}
+						if(sneakHead.x < 0){
+							sneakHead.x = canvas.width/this.size;
+						}
+						if(sneakHead.y*this.size >= canvas.height){
+							sneakHead.y = 0
+						}
+						if(sneakHead.y < 0){
+							sneakHead.y = canvas.height/this.size;
+						}
+						if(sneakHead.x == appleX && sneakHead.y == appleY){
+							this.eaten = true;
+						}
 
-function Game(canvas, ctx){
-	var that = this;
-	this.canvas = canvas;
-	this.ctx = ctx;
-	this.width = canvas.width;
-	this.height = canvas.height;
-	this.state = "New";
-	this.snake = new Snake(this.ctx, this.canvas);
+						for(var i = 0; i < this.bodyPartsHolder.length-1; i++){
+							if(sneakHead.x == this.bodyPartsHolder[i].x && sneakHead.y == this.bodyPartsHolder[i].y){
+								this.alive = false;
+							}
+						}
+					};
 
-	this.drawWelcome = function() {
-		ctx.font = "48px serif";
-		ctx.fillText("Welcome to Snake!", 10, 50);
-		ctx.font = "24px serif";
-		ctx.fillText("Press ENTER to start.", 20, 150);
-		ctx.fillText("Press SPACE to pause.", 20, 180);
-		window.onkeydown = function(e){
-			switch(e.keyCode){
-				case 13/*enter*/:
-					that.state = "PlayGame";
-					that.init();
-					break;
-			}
-		};
-	};
+					this.grow = function(){
+						this.bodyParts++;
+						this.bodyPartsHolder.unshift({x:-1,y:-1});
+					};
+				}
 
-	this.activateGame = function() {
-		this.snake.initSnake();
-		this.intervalID = setInterval(function(){
-			
-			that.ctx.clearRect(0,0,that.canvas.width,that.canvas.height);
+				
+				function Game(canvas, ctx){
 
-		},this.snake.speed);
-	};
-	this.init = function() {
-		switch(this.state){
-			case "New":
-				this.drawWelcome();
-				break;
-			case "PlayGame":
-				this.activateGame();
-				break;
-			case "GameLost":
-				window.onkeydown = function(e){
-				switch(e.keyCode){
-					case 13/*enter*/:
-						that.score = 0;
-						that.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-						that.snake = null;
-						that.snake = new Snake(that.ctx, that.canvas);
+					var that = this;
+					this.canvas = canvas;
+					this.ctx = ctx;
+					this.width = canvas.width;
+					this.height = canvas.height;
+					this.state = "New";
+					this.snake = new Snake(this.ctx, this.canvas);
+					this.apple = new Apple(this.ctx, this.canvas);
+					this.appleCorrect = true;
+					this.score = 0;
 
-						that.state = "New";
-						that.init();
-						break;
-					}
+					this.drawWelcome = function() {
+						ctx.font = "48px serif";
+  						ctx.fillText("Welcome to Snake!", 10, 50);
+  						ctx.font = "24px serif";
+  						ctx.fillText("Press ENTER to start.", 20, 150);
+  						window.onkeydown = function(e){
+							switch(e.keyCode){
+								case 13/*enter*/:
+									that.state = "PlayGame";
+									that.init();
+									break;
+							}
+						};
+					};
+
+					this.activateGame = function() {
+						this.snake.initSnake();
+						this.intervalID = setInterval(function(){
+							if(that.snake.eaten){
+								that.score += that.apple.scoreValue;
+								document.getElementById("score").innerHTML = that.score;
+								that.apple.onBoard = false;
+								that.snake.grow();
+								that.snake.eaten = false;
+							}
+							
+
+							if(that.apple.onBoard) {
+								that.apple.drawApple();
+							} else {
+								do {
+									that.appleCorrect = true;
+									that.apple.randomize();
+									for(var i = 0; i < that.snake.bodyPartsHolder.length; i++){
+										if(that.apple.x == that.snake.bodyPartsHolder[i].x && that.apple.y == that.snake.bodyPartsHolder[i].y ){
+													that.appleCorrect = false;
+													break;
+										}
+									}
+								} while(!(that.appleCorrect));
+
+								that.apple.onBoard = true;
+								that.apple.drawApple();
+							}
+							if(that.snake.alive){
+							} else {
+								that.ctx.font = "50px serif";
+								that.ctx.fillStyle = "red";
+								that.ctx.fillText("Snake is dead", 120, 200);
+								that.ctx.font = "30px serif";
+								that.ctx.fillText("press ENTER", 150, 250);
+								that.ctx.fillText("Twoj wynik: "+that.score, 150, 285);
+								that.ctx.fillStyle = "black";
+								clearInterval(that.intervalID);
+								that.state = "GameLost";
+								that.init();
+							}
+						},this.snake.speed);
+					};
+					
+					this.init = function() {
+						switch(this.state){
+							case "New":
+								this.drawWelcome();
+								break;
+							case "PlayGame":
+								this.activateGame();
+								break;
+							case "GameLost":
+								window.onkeydown = function(e){
+								switch(e.keyCode){
+									case 13/*enter*/:
+										that.score = 0;
+										that.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+										that.snake = null;
+										that.snake = new Snake(that.ctx, that.canvas);
+										that.apple = new Apple(that.ctx, that.canvas);
+										that.state = "New";
+										that.init();
+										break;
+									}
+								};
+								break;
+						}
+					};
 				};
-				break;
-		}
-	};
-};
 
-var gra = new Game(canvas, ctx);
-gra.init();
+				var gra = new Game(canvas, ctx);
+				gra.init();
 
-      }
-   	</script>
+			}
+		</script>
 	</body>
 </html>
