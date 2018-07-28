@@ -23,28 +23,32 @@
 	</head>
 	<body>
 		<h1>Level <span id="level-heading">1</span></h1>
-		<canvas width="600" height="600" id="canvas">
+		<canvas tabindex="0" width="600" height="600" id="canvas">
 
 		</canvas>
 
 		<div id="panel">
 			<h2>Your score: <span id="score">0</span></h2>
 
-			<label for="level">Level:</label>
+			<label for="level">Level:</label><br>
 			<input type="number" id="level" name="level" min="1" max="5" value="1"><br>
 
-			<label for="powerTime">Power-ups time:</label>
+			<label for="powerTime">Power-ups time:</label><br>
 			<input type="range" id="powerTime" name="powerTime" min="100" step="1" max="5000" value="1000" onchange="setPowerTime(this.value);"><br>
 
-			<label for="powerUnit">Power-ups units:</label>
+			<label for="powerUnit">Power-ups units:</label><br>
 			<input type="number" id="powerUnit" name="powerUnit" min="1" max="5" value="1" onchange="setPowerUnits(this.value);"><br>
 
-			<label for="snakeSpeed">Snake speed:</label>
-			<input type="range" id="snakeSpeed" name="snakeSpeed" min="100" step="1" max="500" value="150" onchange="setSnakeSpeed(this.value);"><br><br>
+			<label for="snakeSpeed">Snake speed:</label><br>
+			<input type="range" id="snakeSpeed" name="snakeSpeed" step="1" min="1" max="250" value="150" onchange="setSnakeSpeed(this.value);"><span id="speed">150</span><br><br>
 
 			<button onclick="init()">Start</button>
 		</div>
 		<script type="text/javascript">
+
+		var setSpeed = false;
+		var speed = 150;
+		var speedAmount = document.getElementById("speed");
 
 		function setPowerTime(powerTimeValue){
 			powerTimeValues = parseInt(powerTimeValue);
@@ -58,29 +62,54 @@
 
 		function setSnakeSpeed(snakeSpeed){
 			snakeSpeeds = parseInt(snakeSpeed);
-			console.log("Predkośc weza: " + snakeSpeeds);
+			setSpeed = true;
+			speed = snakeSpeeds;
+			speedAmount.innerHTML = speed;
 		}
 
 			function init(){
 				var canvas = document.querySelector("#canvas");
 				var ctx = canvas.getContext("2d");
 
+				canvas.focus();
+
 				var level = document.getElementById("level").value;
 				var scoreValue = 1;
 				var powerTimeValue = 5000;
 				var powerUnitValue = 1;
-				var speed = 150;
 				if(level == 2){
 					scoreValue = 2;
+					if(!(setSpeed)){
+						speed = 120;
+						speedAmount.innerHTML = speed;
+					}
 				} else if(level == 3) {
 					scoreValue = 4;
+					if(!(setSpeed)){
+						speed = 100;
+						speedAmount.innerHTML = speed;
+				  }
 				} else if(level == 4) {
 					scoreValue = 8;
+					if(!(setSpeed)){
+						speed = 70;
+						speedAmount.innerHTML = speed;
+					}
 				} else if(level == 5) {
 					scoreValue = 12;
+					if(!(setSpeed)){
+						speed = 50;
+						speedAmount.innerHTML = speed;
+					}
 				} else {
 					scoreValue = 1;
+					if(!(setSpeed)){
+						speed = 150;
+						speedAmount.innerHTML = speed;
+					}
 				}
+
+				// ---  OBSTACLE CONSTRUCTOR --- //
 
 				function Obstacle(ctx, canvas) {
 					this.canvas = canvas;
@@ -101,20 +130,23 @@
 						this.ctx.rect(this.x*this.size,this.y*this.size,this.size,this.size);
 						this.ctx.fill();
 						this.ctx.closePath();
-						this.ctx.fillStyle = "black";
 					};
 				}
+
+				// ---  POWER-UP CONSTRUCTOR --- //
 
 				function Power(ctx, canvas) {
 					this.canvas = canvas;
 					this.ctx = ctx;
 					this.size = 25;
 					this.onBoard = false;
+					this.eatenPower = true;
 					this.x = 0;
 					this.y = 0;
 
-					this.powerTimeValue = powerTimeValue;
-					this.powerUnitValue = powerUnitValue;
+					this.powerType = 1;
+					this.powerTimeValue = powerTimeValues;
+					this.powerUnitValue = powerUnitValues;
 
 					this.randomize = function() {
 						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
@@ -131,6 +163,8 @@
 					};
 				}
 
+
+				// ---  APPLE CONSTRUCTOR --- //
 
 				function Apple(ctx, canvas) {
 					this.canvas = canvas;
@@ -157,16 +191,19 @@
 					};
 				}
 
+				// ---  SNAKE CONSTRUCTOR --- //
+
 				function Snake(ctx, canvas) {
 					var that = this;
 					this.canvas = canvas;
 					this.ctx = ctx;
 					this.speed = speed;
+					console.log(speed);
 					this.size = 25;
 					this.bodyParts= 8;
 					this.bodyPartsHolder = [];
 					this.direction = "right";
-					
+					this.paused = false;
 					this.alive = true;
 					this.eaten = false;
 					this.charged = false;
@@ -232,7 +269,17 @@
 										that.direction = "down";
 									}
 									break;
-
+								case 32 /*spacja*/:
+									if(that.paused){
+										that.paused = false;
+									} else {
+										that.paused = true;
+										that.ctx.font = "50px serif red";
+										that.ctx.fillStyle = "red";
+										that.ctx.fillText("PAUZA", 150, 250);
+										that.ctx.fillStyle = "black";
+									}
+									break;
 							}
 						};
 					};
@@ -287,7 +334,8 @@
 					};
 				}
 
-				
+				// ---  GAME CONSTRUCTOR --- //
+
 				function Game(canvas, ctx){
 
 
@@ -324,7 +372,7 @@
   						ctx.fillText("Welcome to Snake!", 10, 50);
   						ctx.font = "24px serif";
   						ctx.fillText("Press ENTER to start.", 20, 150);
-  						
+  						ctx.fillText("Press SPACE to pause.", 20, 180);
   						window.onkeydown = function(e){
 							switch(e.keyCode){
 								case 13/*enter*/:
@@ -344,15 +392,33 @@
 								that.apple.onBoard = false;
 								that.snake.grow();
 								that.snake.eaten = false;
+								that.power.eatenPower = false;
 							}
 
 							if(that.snake.charged){
 								that.power.onBoard = false;
+								that.power.eatenPower = true;
+								console.log(that.power.onBoard);
+								
 								that.snake.charged = false;
+
+								if(that.snake.powerType == 1){
+									console.log("skrócić węża o " + that.power.powerUnitValue + "");
+								} else if(that.snake.powerType == 2){
+									console.log("wydłużyć węża o " + that.power.powerUnitValue + "");
+								} else if(that.snake.powerType == 3){
+									console.log("przyspieszyć węża na " + that.power.powerTimeValue + " sekund");
+								} else if(that.snake.powerType == 4){
+									console.log("spowolnić węża na " + that.power.powerTimeValue + " sekund");
+								} else if(that.snake.powerType == 5){
+									console.log("więcej punktów (standardowa liczba przemnożona przez " + that.power.powerUnitValue + ")");
+								} else {
+									console.log("sprawić, że wąż może przechodzić przez elementy labiryntu przez " + that.power.powerTimeValue + " sekund");
+								}
 							}
-							
+							if(that.snake.paused != true){
 								that.ctx.clearRect(0,0,that.canvas.width,that.canvas.height);
-							
+							};
 
 							if(that.obstacle.onBoard) {
 								that.obstacle.drawObstacle();
@@ -394,9 +460,9 @@
 								that.apple.drawApple();
 							}
 
-							if(that.power.onBoard) {
+							if(that.power.onBoard && that.power.eatenPower == false) {
 								that.power.drawPower();
-							} else {
+							} else if(that.score != 0 && that.score%(that.apple.scoreValue + that.apple.scoreValue) == 0 && that.power.onBoard == false && that.snake.charged == false) {
 								do {
 									that.powerCorrect = true;
 									that.power.randomize();
@@ -412,14 +478,16 @@
 									}
 								} while(!(that.powerCorrect));
 
+								that.snake.powerType = Math.floor(Math.random() * 7);
 								that.power.onBoard = true;
 								that.power.drawPower();
 							}
+
 							if(that.snake.alive){
-								
+								if(that.snake.paused != true){
 									that.snake.moveSnake();
 									that.snake.checkColissions(that.apple.x,that.apple.y,that.obstacle.x,that.obstacle.y,that.power.x,that.power.y);
-								
+								}
 							} else {
 								that.ctx.font = "50px serif";
 								that.ctx.fillStyle = "red";
@@ -435,6 +503,7 @@
 						},this.snake.speed);
 					};
 					this.init = function() {
+
 						switch(this.state){
 							case "New":
 								this.drawWelcome();
