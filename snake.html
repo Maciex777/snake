@@ -13,12 +13,16 @@
 				float:left;
 				padding:20px;
 			}
+			h1{
+				margin-left: 20px;
+			}
 			h2{
 				font-size:35px;
 			}
 		</style>
 	</head>
 	<body>
+		<h1>Level <span id="level-heading">1</span></h1>
 		<canvas width="600" height="600" id="canvas">
 
 		</canvas>
@@ -26,12 +30,22 @@
 		<div id="panel">
 			<h2>Your score: <span id="score">0</span></h2>
 
+			<label for="level">Level:</label>
+			<input type="number" id="level" name="level" min="1" max="5" value="1"><br>
+
 			<button onclick="init()">Start</button>
 		</div>
 		<script type="text/javascript">
+			
 			function init(){
 				var canvas = document.querySelector("#canvas");
 				var ctx = canvas.getContext("2d");
+
+				var level = document.getElementById("level").value;
+				var scoreValue = 1;
+				var powerTimeValue = 5000;
+				var powerUnitValue = 1;
+				var speed = 150;
 
 				function Obstacle(ctx, canvas) {
 					this.canvas = canvas;
@@ -40,6 +54,7 @@
 					this.onBoard = false;
 					this.x = 0;
 					this.y = 0;
+					
 					this.randomize = function() {
 						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
 						this.y = Math.floor(Math.random() * (this.canvas.height/this.size));
@@ -55,6 +70,31 @@
 					};
 				}
 
+				function Power(ctx, canvas) {
+					this.canvas = canvas;
+					this.ctx = ctx;
+					this.size = 25;
+					this.onBoard = false;
+					this.x = 0;
+					this.y = 0;
+
+				
+					this.randomize = function() {
+						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
+						this.y = Math.floor(Math.random() * (this.canvas.height/this.size));
+					};
+
+					this.drawPower = function() {
+						this.ctx.fillStyle = "violet";
+						this.ctx.beginPath();
+						this.ctx.rect(this.x*this.size,this.y*this.size,this.size,this.size);
+						this.ctx.fill();
+						this.ctx.closePath();
+						this.ctx.fillStyle = "black";
+					};
+				}
+
+
 				function Apple(ctx, canvas) {
 					this.canvas = canvas;
 					this.ctx = ctx;
@@ -63,7 +103,7 @@
 					this.x = 0;
 					this.y = 0;
 					
-					this.scoreValue = 5;
+					this.scoreValue = scoreValue;
 
 					this.randomize = function() {
 						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
@@ -84,13 +124,15 @@
 					var that = this;
 					this.canvas = canvas;
 					this.ctx = ctx;
-					this.speed = 150;
+					this.speed = speed;
 					this.size = 25;
 					this.bodyParts= 8;
 					this.bodyPartsHolder = [];
 					this.direction = "right";
+					
 					this.alive = true;
 					this.eaten = false;
+					this.charged = false;
 
 					this.initSnake = function(){
 						for (var i=0; i < this.bodyParts; i++) {
@@ -153,6 +195,7 @@
 										that.direction = "down";
 									}
 									break;
+								
 							}
 						};
 					};
@@ -171,7 +214,7 @@
 						};
 					};
 
-					this.checkColissions = function(appleX,appleY,obstacleX,obstacleY){
+					this.checkColissions = function(appleX,appleY,obstacleX,obstacleY,powerX,powerY){
 						var sneakHead = this.bodyPartsHolder[this.bodyParts-1];
 						if(sneakHead.x*this.size >= canvas.width){
 							sneakHead.x = 0
@@ -187,11 +230,12 @@
 						}
 						if(sneakHead.x == appleX && sneakHead.y == appleY){
 							this.eaten = true;
-							console.log(obstacleY);
+						}
+						if(sneakHead.x == powerX && sneakHead.y == powerY){
+							this.charged = true;
 						}
 						if(sneakHead.x == obstacleX && sneakHead.y == obstacleY){
 							this.alive = false;
-							console.log("DEAD");
 						}
 						for(var i = 0; i < this.bodyPartsHolder.length-1; i++){
 							if(sneakHead.x == this.bodyPartsHolder[i].x && sneakHead.y == this.bodyPartsHolder[i].y){
@@ -206,8 +250,23 @@
 					};
 				}
 
-			
+				
+
 				function Game(canvas, ctx){
+
+
+					var levelHeading = document.getElementById("level-heading");
+					if(level == 2){
+						levelHeading.innerHTML = " 2";
+					} else if(level == 3) {
+						levelHeading.innerHTML = " 3";
+					} else if(level == 4) {
+						levelHeading.innerHTML = " 4";
+					} else if(level == 5) {
+						levelHeading.innerHTML = " 5";
+					} else {
+							levelHeading.innerHTML = " 1";
+					}
 
 					var that = this;
 					this.canvas = canvas;
@@ -217,8 +276,10 @@
 					this.state = "New";
 					this.snake = new Snake(this.ctx, this.canvas);
 					this.apple = new Apple(this.ctx, this.canvas);
+					this.power = new Power(this.ctx, this.canvas);
 					this.obstacle = new Obstacle(this.ctx, this.canvas);
 					this.appleCorrect = true;
+					this.powerCorrect = true;
 					this.obstacleCorrect = true;
 					this.score = 0;
 
@@ -246,6 +307,11 @@
 								that.apple.onBoard = false;
 								that.snake.grow();
 								that.snake.eaten = false;
+							}
+
+							if(that.snake.charged){
+								that.power.onBoard = false;
+								that.snake.charged = false;
 							}
 							
 								that.ctx.clearRect(0,0,that.canvas.width,that.canvas.height);
@@ -290,11 +356,33 @@
 								that.apple.onBoard = true;
 								that.apple.drawApple();
 							}
+
+							if(that.power.onBoard) {
+								that.power.drawPower();
+							} else {
+								do {
+									that.powerCorrect = true;
+									that.power.randomize();
+									for(var l = 0; l < that.snake.bodyPartsHolder.length; l++){
+										if(that.power.x == that.snake.bodyPartsHolder[l].x && that.power.y == that.snake.bodyPartsHolder[l].y ){
+											for(var m = 0; m < that.obstacle.size.length; m++){
+												if(that.power.x == that.obstacle.size[m].x && that.power.y == that.obstacle.size[m].y ){
+													that.powerCorrect = false;
+													break;
+												}
+											}
+										}
+									}
+								} while(!(that.powerCorrect));
+
+								that.power.onBoard = true;
+								that.power.drawPower();
+							}
 							if(that.snake.alive){
+								
 									that.snake.moveSnake();
-									that.snake.checkColissions(that.apple.x,that.apple.y,that.obstacle.x,that.obstacle.y);
-									console.log(that.apple.x,that.apple.y,that.obstacle.x,that.obstacle.y);
-							
+									that.snake.checkColissions(that.apple.x,that.apple.y,that.obstacle.x,that.obstacle.y,that.power.x,that.power.y);
+								
 							} else {
 								that.ctx.font = "50px serif";
 								that.ctx.fillStyle = "red";
@@ -326,6 +414,7 @@
 										that.snake = null;
 										that.snake = new Snake(that.ctx, that.canvas);
 										that.apple = new Apple(that.ctx, that.canvas);
+										that.power = new Power(that.ctx, that.canvas);
 										that.obstacle = new Obstacle(that.ctx, that.canvas);
 										that.state = "New";
 										that.init();
