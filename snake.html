@@ -33,10 +33,34 @@
 			<label for="level">Level:</label>
 			<input type="number" id="level" name="level" min="1" max="5" value="1"><br>
 
+			<label for="powerTime">Power-ups time:</label>
+			<input type="range" id="powerTime" name="powerTime" min="100" step="1" max="5000" value="1000" onchange="setPowerTime(this.value);"><br>
+
+			<label for="powerUnit">Power-ups units:</label>
+			<input type="number" id="powerUnit" name="powerUnit" min="1" max="5" value="1" onchange="setPowerUnits(this.value);"><br>
+
+			<label for="snakeSpeed">Snake speed:</label>
+			<input type="range" id="snakeSpeed" name="snakeSpeed" min="100" step="1" max="500" value="150" onchange="setSnakeSpeed(this.value);"><br><br>
+
 			<button onclick="init()">Start</button>
 		</div>
 		<script type="text/javascript">
-			
+
+		function setPowerTime(powerTimeValue){
+			powerTimeValues = parseInt(powerTimeValue);
+			console.log("czas powerupa: " + powerTimeValues);
+		}
+
+		function setPowerUnits(powerUnitValue){
+			powerUnitValues = parseInt(powerUnitValue);
+			console.log("jednostka powerupa: " + powerUnitValues);
+		}
+
+		function setSnakeSpeed(snakeSpeed){
+			snakeSpeeds = parseInt(snakeSpeed);
+			console.log("Predkośc weza: " + snakeSpeeds);
+		}
+
 			function init(){
 				var canvas = document.querySelector("#canvas");
 				var ctx = canvas.getContext("2d");
@@ -46,6 +70,17 @@
 				var powerTimeValue = 5000;
 				var powerUnitValue = 1;
 				var speed = 150;
+				if(level == 2){
+					scoreValue = 2;
+				} else if(level == 3) {
+					scoreValue = 4;
+				} else if(level == 4) {
+					scoreValue = 8;
+				} else if(level == 5) {
+					scoreValue = 12;
+				} else {
+					scoreValue = 1;
+				}
 
 				function Obstacle(ctx, canvas) {
 					this.canvas = canvas;
@@ -78,7 +113,9 @@
 					this.x = 0;
 					this.y = 0;
 
-				
+					this.powerTimeValue = powerTimeValue;
+					this.powerUnitValue = powerUnitValue;
+
 					this.randomize = function() {
 						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
 						this.y = Math.floor(Math.random() * (this.canvas.height/this.size));
@@ -195,7 +232,7 @@
 										that.direction = "down";
 									}
 									break;
-								
+
 							}
 						};
 					};
@@ -251,7 +288,6 @@
 				}
 
 				
-
 				function Game(canvas, ctx){
 
 
@@ -288,6 +324,7 @@
   						ctx.fillText("Welcome to Snake!", 10, 50);
   						ctx.font = "24px serif";
   						ctx.fillText("Press ENTER to start.", 20, 150);
+  						
   						window.onkeydown = function(e){
 							switch(e.keyCode){
 								case 13/*enter*/:
