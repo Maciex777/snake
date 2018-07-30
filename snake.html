@@ -4,6 +4,10 @@
 		<title>Snake</title>
 		<meta charset="UTF-8"/>
 		<style type="text/css">
+			.container{
+				width: 930px;
+				margin: auto;
+			}
 			canvas {
 				border: 1px solid black;
 				float:left;
@@ -16,53 +20,76 @@
 			#info-panel{
 				max-width: 300px;
 			}
+			#highscore-panel{
+				float:left;
+				padding:40px 20px;
+			}
 			h1{
 				margin-left: 20px;
 			}
 			h2{
 				font-size:35px;
 			}
+			#playAgain{
+				display: none;
+			}
+			#info-panel{
+				display: none;
+			}
 		</style>
 	</head>
 	<body>
-		<h1>Level <span id="level-heading">1</span></h1>
-		<canvas tabindex="0" width="500" height="500" id="canvas">
+		<div class="container">
+			<h1>Level <span id="level-heading">1</span></h1>
+			<canvas tabindex="0" width="500" height="500" id="canvas">
 
-		</canvas>
+			</canvas>
 
-		<div id="panel">
-			<h2>Your score: <span id="score">0</span></h2>
+			<div id="panel">
+				<h2>Your score: <span id="score">0</span></h2>
 
-			<div id="parameters">
-				<label for="level">Level:</label><br>
-				<input type="number" id="level" name="level" min="1" max="5" value="1"><br>
+				<div id="parameters">
+					<label for="level">Level:</label><br>
+					<input type="number" id="level" name="level" min="1" max="5" value="1"><br>
 
-				<label for="powerTime">Power-ups time:</label><br>
-				<input type="range" id="powerTime" name="powerTime" min="3000" step="1" max="10000" value="1000" onchange="setPowerTime(this.value);"><br>
+					<label for="powerTime">Power-ups time:</label><br>
+					<input type="range" id="powerTime" name="powerTime" min="3000" step="1" max="10000" value="1000" onchange="setPowerTime(this.value);"><span id="powerTimeAmount">150</span><br>
 
-				<label for="powerUnit">Power-ups unit:</label><br>
-				<input type="number" id="powerUnit" name="powerUnit" min="1" max="5" value="1" onchange="setPowerUnits(this.value);"><br>
+					<label for="powerUnit">Power-ups unit:</label><br>
+					<input type="number" id="powerUnit" name="powerUnit" min="1" max="5" value="1" onchange="setPowerUnits(this.value);"><br>
 
-				<label for="snakeSpeed">Snake speed:</label><br>
-				<input type="range" id="snakeSpeed" name="snakeSpeed" step="1" min="1" max="250" value="150" onchange="setSnakeSpeed(this.value);"><span id="speed">150</span><br><br>
+					<label for="snakeSpeed">Snake speed:</label><br>
+					<input type="range" id="snakeSpeed" name="snakeSpeed" step="1" min="1" max="250" value="150" onchange="setSnakeSpeed(this.value);"><span id="speed">150</span><br><br>
 
-				<button onclick="init()">Start</button>
+					<button onclick="init()">Start</button>
+				</div>
+				<div id="info-panel">
+					<h3>Power-ups time: <span id="actualPowerTime">0</span></h3>
+					<h3>Power-ups unit: <span id="actualPowerUnit">0</span></h3>
+					<h3>Snake speed: <span id="actualSnakeSpeed">0</span></h3>
+					<h3>Snake length: <span id="actualSnakeLength">0</span></h3>
+					<h3>Point value: <span id="actualPointValue">0</span></h3>
+					<h3>Power-up type: <span id="actualPowerType">?</span></h3>
+					<button id="playAgain">Zagraj ponownie</button>
+				</div>
 			</div>
-			<div id="info-panel">
-				<h3>Power-ups time:<span id="actualPowerTime">0</span></h3>
-				<h3>Power-ups unit:<span id="actualPowerUnit">0</span></h3>
-				<h3>Snake speed:<span id="actualSnakeSpeed">0</span></h3>
-				<h3>Snake length:<span id="actualSnakeLength">0</span></h3>
-				<h3>Point value:<span id="actualPointValue">0</span></h3>
-				<h3>Power-up type:<span id="actualPowerType">?</span></h3>
+			<div id="highscore-panel">
+				<h4>Best scores:</h4>
+				<ul id="highscores"></ul>
 			</div>
 		</div>
 		<script type="text/javascript">
 
+		var parameters = document.getElementById("parameters");
+		var info = document.getElementById("info-panel");
+		var playAgain = document.getElementById("playAgain")
+		var highscores = document.getElementById("highscores")
+		var highscore = 0;
 		var setSpeed = false;
 		//default speed setting
 		var speed = 150;
 		var speedAmount = document.getElementById("speed");
+		var powerTimeAmount = document.getElementById("powerTimeAmount");
 		var actualPowerTime = document.getElementById("actualPowerTime");
 		var actualPowerUnit = document.getElementById("actualPowerUnit");
 		var actualSpeedAmount = document.getElementById("actualSnakeSpeed");
@@ -77,6 +104,7 @@
 		//setting power-up time by input onchange
 		function setPowerTime(powerTimeValue){
 			powerTimeValues = parseInt(powerTimeValue);
+			powerTimeAmount.innerHTML = powerTimeValues;
 		}
 
 		//setting power-up unit by input onchange
@@ -93,6 +121,7 @@
 		}
 
 			function init(){
+
 				var canvas = document.querySelector("#canvas");
 				var ctx = canvas.getContext("2d");
 
@@ -101,9 +130,10 @@
 				var level = document.getElementById("level").value;
 				var scoreValue = 1;
 
-
 				//setting score points value and snake speed depending on level
 				if(level == 2){
+					canvas.setAttribute("width", "450");
+					canvas.setAttribute("height", "450");
 					scoreValue = 2;
 					if(!(setSpeed)){
 						speed = 120;
@@ -115,24 +145,32 @@
 						speed = 100;
 						speedAmount.innerHTML = speed;
 				  }
+					canvas.setAttribute("width", "400");
+					canvas.setAttribute("height", "400");
 				} else if(level == 4) {
 					scoreValue = 8;
 					if(!(setSpeed)){
 						speed = 70;
 						speedAmount.innerHTML = speed;
 					}
+					canvas.setAttribute("width", "350");
+					canvas.setAttribute("height", "350");
 				} else if(level == 5) {
 					scoreValue = 12;
 					if(!(setSpeed)){
 						speed = 50;
 						speedAmount.innerHTML = speed;
 					}
+					canvas.setAttribute("width", "300");
+					canvas.setAttribute("height", "300");
 				} else {
 					scoreValue = 1;
 					if(!(setSpeed)){
 						speed = 150;
 						speedAmount.innerHTML = speed;
 					}
+					canvas.setAttribute("width", "500");
+					canvas.setAttribute("height", "500");
 				}
 
 				// ---  OBSTACLE CONSTRUCTOR --- //
@@ -440,7 +478,6 @@
 
 				function Game(canvas, ctx){
 
-
 					var levelHeading = document.getElementById("level-heading");
 					//check level and set heading
 					if(level == 2){
@@ -477,22 +514,11 @@
 					this.score = 0;
 
 
-					//drawWelcome method called by the init method when the state field is New.
-					//This method prints instructions on the board, and adds to the object window eventlistner, which causes that after pressing enter the field state changes to "playGame" and the init method is restarted.
-					this.drawWelcome = function() {
-						ctx.font = "48px serif";
-  						ctx.fillText("Welcome to Snake!", 10, 50);
-  						ctx.font = "24px serif";
-  						ctx.fillText("Press ENTER to start.", 20, 150);
-  						ctx.fillText("Press SPACE to pause.", 20, 180);
-  						window.onkeydown = function(e){
-							switch(e.keyCode){
-								case 13/*enter*/:
-									that.state = "PlayGame";
-									that.init();
-									break;
-							}
-						};
+					//welcome method called by the init method when the state field is New.
+					//This method changes state to "playGame" and the init method is restarted.
+					this.welcome = function() {
+						that.state = "PlayGame";
+						that.init();
 					};
 
 
@@ -513,25 +539,17 @@
 
 							//the method checks if the snake has eaten a power-up
 							if(that.snake.charged){
-								//that.score += that.power.scoreValue;
-								//document.getElementById("score").innerHTML = that.score;
 								that.power.onBoard = false;
-								console.log(that.power.onBoard);
-								//that.snake.grow();
 								var yes = true;
 								that.snake.charged = false;
 								//the selected type of power-up is performed
 								if(!(that.power.eatenPower)){
 									if(that.snake.powerType == 1){
-										actualPowerType.innerHTML = "skrócić węża o " + that.power.powerUnitValue;
-										//actualSnakeLength.innerHTML = that.snake.bodyParts - that.power.powerUnitValue;
-										console.log("skrócić węża o " + that.power.powerUnitValue + "");
+										actualPowerType.innerHTML = "Shortening the snake by " + that.power.powerUnitValue;
 										that.snake.bodyParts -= that.power.powerUnitValue;
 										that.snake.bodyPartsHolder.length -= that.power.powerUnitValue;
 									} else if(that.snake.powerType == 2){
-										actualPowerType.innerHTML = "wydłużyć węża o " + that.power.powerUnitValue;
-										//actualSnakeLength.innerHTML = that.snake.bodyParts - that.power.powerUnitValue;
-										console.log("wydłużyć węża o " + that.power.powerUnitValue + "");
+										actualPowerType.innerHTML = "Extension of the snake by " + that.power.powerUnitValue;
 										var h = 0;
 										while(h < that.power.powerUnitValue){
 											that.snake.bodyParts++;
@@ -539,30 +557,23 @@
 											h++;
 										}
 									} else if(that.snake.powerType == 3){
-										actualPowerType.innerHTML = "przyspieszyć węża na " + that.power.powerTimeValue + " sekund";
-										console.log("przyspieszyć węża na " + that.power.powerTimeValue + " sekund");
+										actualPowerType.innerHTML = "Acceleration of the snake on " + that.power.powerTimeValue + " seconds";
 										that.snake.speed = that.snake.speed/2;
-										console.log("prędkość węża po zjedzeniu powera" + that.snake.speed);
 										setTimeout(function(){
 											that.snake.speed = that.snake.speed*2;
-											console.log("koniec działania powerupa. prędkość węża to teraz" + that.snake.speed);
 										}, that.power.powerTimeValue);
 									} else if(that.snake.powerType == 4){
-										actualPowerType.innerHTML = "spowolnić węża na " + that.power.powerTimeValue + " sekund";
-										console.log("spowolnić węża na " + that.power.powerTimeValue + " sekund");
+										actualPowerType.innerHTML = "Slow the snake on " + that.power.powerTimeValue + " seconds";
 										that.snake.speed = that.snake.speed*2;
-										console.log("prędkość węża po zjedzeniu powera" + that.snake.speed);
 										setTimeout(function(){
 											that.snake.speed = that.snake.speed/2;
-											console.log("koniec działania powerupa. prędkość węża to teraz" + that.snake.speed);
 										}, that.power.powerTimeValue);
 									} else if(that.snake.powerType == 5){
-										actualPowerType.innerHTML = "więcej punktów (standardowa liczba przemnożona przez " + that.power.powerUnitValue + ")";
-										console.log("więcej punktów (standardowa liczba przemnożona przez " + that.power.powerUnitValue + ")");
+										actualPowerType.innerHTML = "More points (standard number multiplied by " + that.power.powerUnitValue + ")";
+										that.apple.scoreValue *= that.power.powerUnitValue;
 									} else {
-										actualPowerType.innerHTML = "sprawić, że wąż może przechodzić przez elementy labiryntu przez " + that.power.powerTimeValue + " sekund";
-										console.log("sprawić, że wąż może przechodzić przez elementy labiryntu przez " + that.power.powerTimeValue + " sekund");
-									}
+										actualPowerType.innerHTML = "Make the snake go through the elements of the maze for " + that.power.powerTimeValue + " seconds";
+								}
 								}
 
 								that.power.eatenPower = true;
@@ -651,18 +662,19 @@
 								if(that.snake.paused != true){
 									that.snake.moveSnake();
 									that.snake.checkColissions(that.apple.x,that.apple.y,that.obstacle.x,that.obstacle.y,that.power.x,that.power.y);
+									playAgain.style.display = "none";
 								}
 							} else {
 								that.ctx.font = "50px serif";
 								that.ctx.fillStyle = "red";
 								that.ctx.fillText("Snake is dead", 120, 200);
 								that.ctx.font = "30px serif";
-								that.ctx.fillText("press ENTER", 150, 250);
 								that.ctx.fillText("Your score: "+that.score, 150, 285);
 								that.ctx.fillStyle = "black";
 								clearInterval(that.intervalID);
 								that.state = "GameLost";
 								that.init();
+								playAgain.style.display = "block";
 							}
 							actualSnakeLength.innerHTML = that.snake.bodyParts;
 							actualSpeedAmount.innerHTML = that.snake.speed;
@@ -673,29 +685,56 @@
 					//If the state is equal to "gameLost", this function resets all settings to prepare the game for a new batch.
 					this.init = function() {
 
+						 info.style.display = "block";
+						 parameters.style.display = "none";
 						switch(this.state){
 							case "New":
-								this.drawWelcome();
+								this.welcome();
 								break;
 							case "PlayGame":
 								this.activateGame();
 								break;
 							case "GameLost":
-								window.onkeydown = function(e){
-								switch(e.keyCode){
-									case 13/*enter*/:
-										that.score = 0;
-										that.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-										that.snake = null;
-										that.snake = new Snake(that.ctx, that.canvas);
-										that.apple = new Apple(that.ctx, that.canvas);
-										that.power = new Power(that.ctx, that.canvas);
-										that.obstacle = new Obstacle(that.ctx, that.canvas);
-										that.state = "New";
-										that.init();
-										break;
-									}
-								};
+
+								playAgain.onclick = function(){
+											that.ctx.clearRect(0,0,that.canvas.width,that.canvas.height);
+											that.snake = null;
+											that.snake = new Snake(that.ctx, that.canvas);
+											that.apple = new Apple(that.ctx, that.canvas);
+											that.power = new Power(that.ctx, that.canvas);
+											that.obstacle = new Obstacle(that.ctx, that.canvas);
+											that.state = "New";
+
+											//save highscores
+											if(highscore !== null){
+											    if (that.score > highscore) {
+															highscore.innerHTML = that.score;
+															var newItem = document.createElement("LI");
+															var textnode = document.createTextNode(that.score);
+															newItem.appendChild(textnode);
+															highscores.insertBefore(newItem, highscores.childNodes[0]);
+
+															var h=0, itemCount = 0;
+															while(highscores.getElementsByTagName('li') [h++]) itemCount++;
+															//save only 5 best scores
+															if(itemCount > 5){
+																	highscores.removeChild(highscores.lastChild);
+															}
+
+															that.score = 0;
+															document.getElementById("score").innerHTML = that.score;
+											    }
+											}
+											else{
+											    localStorage.setItem("highscore", that.score);
+													that.score = 0;
+													document.getElementById("score").innerHTML = that.score;
+											}
+
+											info.style.display = "none";
+											parameters.style.display = "block";
+								}
+
 								break;
 						}
 					};
