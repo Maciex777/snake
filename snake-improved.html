@@ -656,7 +656,7 @@
 
 
 								//random selection of a power-up type
-								that.snake.powerType = 6;
+								that.snake.powerType = Math.floor(Math.random() * 7);
 								that.power.onBoard = true;
 								that.power.drawPower();
 							}
