@@ -709,7 +709,7 @@
 											if(highscore !== null){
 											    if (that.score > highscore) {
 															highscore = that.score;
-															console.log(highscore);
+															
 															var newItem = document.createElement("LI");
 															var textnode = document.createTextNode(that.score);
 															newItem.appendChild(textnode);
@@ -731,7 +731,7 @@
 													that.score = 0;
 													document.getElementById("score").innerHTML = that.score;
 											}
-											console.log(highscore);
+										
 											info.style.display = "none";
 											parameters.style.display = "block";
 								}
