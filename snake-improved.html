@@ -471,12 +471,6 @@
 						this.bodyParts++;
 						this.bodyPartsHolder.unshift({x:-1,y:-1});
 					};
-
-					// this.speedUp = function(){
-					// 	clearInterval(intervalID);
-					// 	this.speed *= 2;
-					// 	this.intervalID;
-					// };
 				}
 
 
@@ -665,7 +659,7 @@
 
 
 								//random selection of a power-up type
-								that.snake.powerType = Math.floor(Math.random() * 7);;
+								that.snake.powerType = Math.floor(Math.random() * 7);
 								that.power.onBoard = true;
 								that.power.drawPower();
 							}
