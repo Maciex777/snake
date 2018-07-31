@@ -5,7 +5,7 @@
 		<meta charset="UTF-8"/>
 		<style type="text/css">
 			.container{
-				width: 930px;
+				width: 1000px;
 				margin: auto;
 			}
 			canvas {
@@ -21,7 +21,6 @@
 				max-width: 300px;
 			}
 			#highscore-panel{
-				float:left;
 				padding:40px 20px;
 			}
 			h1{
@@ -124,7 +123,8 @@
 
 				var canvas = document.querySelector("#canvas");
 				var ctx = canvas.getContext("2d");
-
+				//start looping
+				var looping = true;
 				canvas.focus();
 
 				var level = document.getElementById("level").value;
@@ -470,10 +470,18 @@
 					this.grow = function(){
 						this.bodyParts++;
 						this.bodyPartsHolder.unshift({x:-1,y:-1});
-						//update information about actual snake length
-
 					};
+
+					// this.speedUp = function(){
+					// 	clearInterval(intervalID);
+					// 	this.speed *= 2;
+					// 	this.intervalID;
+					// };
 				}
+
+
+
+
 
 
 				// ---  GAME CONSTRUCTOR --- //
@@ -523,11 +531,12 @@
 						that.init();
 					};
 
-
 					//activateGame method first initializes the snake by calling the Snake object method - initSnake and then sets setInterval.
 					this.activateGame = function() {
 						this.snake.initSnake();
-						this.intervalID = setInterval(function(){
+						var t = 0;
+				 		function loop() {
+						//this.intervalID = setInterval(function(){
 							//First, the method checks if the snake has eaten the apple (through the field of the Snake object).
 							//If so the player is added points, the snake grows and the apple is removed from the board.
 							if(that.snake.eaten){
@@ -560,15 +569,15 @@
 										}
 									} else if(that.snake.powerType == 3){
 										actualPowerType.innerHTML = "Acceleration of the snake on " + that.power.powerTimeValue + " seconds";
-										that.snake.speed = that.snake.speed/2;
+										that.snake.speed /= 2;
 										setTimeout(function(){
-											that.snake.speed = that.snake.speed*2;
+											that.snake.speed *= 2;
 										}, that.power.powerTimeValue);
 									} else if(that.snake.powerType == 4){
-										actualPowerType.innerHTML = "Slow the snake on " + that.power.powerTimeValue + " seconds";
-										that.snake.speed = that.snake.speed*2;
+										actualPowerType.innerHTML = "Slow down the snake on " + that.power.powerTimeValue + " seconds";
+										that.snake.speed *= 2;
 										setTimeout(function(){
-											that.snake.speed = that.snake.speed/2;
+											that.snake.speed /= 2;
 										}, that.power.powerTimeValue);
 									} else if(that.snake.powerType == 5){
 										actualPowerType.innerHTML = "More points (standard number multiplied by " + that.power.powerUnitValue + ")";
@@ -656,7 +665,7 @@
 
 
 								//random selection of a power-up type
-								that.snake.powerType = Math.floor(Math.random() * 7);
+								that.snake.powerType = Math.floor(Math.random() * 7);;
 								that.power.onBoard = true;
 								that.power.drawPower();
 							}
@@ -677,7 +686,7 @@
 								that.ctx.font = "30px serif";
 								that.ctx.fillText("Your score: "+that.score, 150, 285);
 								that.ctx.fillStyle = "black";
-								clearInterval(that.intervalID);
+								t = 0;
 								that.state = "GameLost";
 								that.init();
 								playAgain.style.display = "block";
@@ -685,7 +694,16 @@
 							actualSnakeLength.innerHTML = that.snake.bodyParts;
 							actualSpeedAmount.innerHTML = that.snake.speed;
 							actualPointValue.innerHTML = that.apple.scoreValue;
-						},that.snake.speed);
+
+							//console.log(this.bodyPartsHolder[i]);
+							t++;
+							if(looping){
+						  	this.setTimeout(loop, that.snake.speed);
+							}
+						}
+						if(looping){
+							loop();
+						}
 					};
 					//init method supports the appropriate game states and, depending on the value of the state field, calls the appropriate methods.
 					//If the state is equal to "gameLost", this function resets all settings to prepare the game for a new batch.
@@ -701,7 +719,8 @@
 								this.activateGame();
 								break;
 							case "GameLost":
-
+								//stop looping
+								looping = false;
 								playAgain.onclick = function(){
 											that.ctx.clearRect(0,0,that.canvas.width,that.canvas.height);
 											that.snake = null;
