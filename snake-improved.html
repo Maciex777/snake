@@ -319,6 +319,8 @@
 					this.eaten = false;
 					//charged –  set to true when the snake eats power-up
 					this.charged = false;
+					//set to true when the snake get power-up with maze penetration
+					this.mazePenetrate = false;
 
 
 					//initSnake method initializes the snake. Fills the bodyPartsHolder array with objects with appropriate values of half x and y.
@@ -450,7 +452,7 @@
 							this.charged = true;
 						}
 						//if the snake falls on the obstacle, the alive field will be false.
-						if(sneakHead.x == obstacleX && sneakHead.y == obstacleY){
+						if(sneakHead.x == obstacleX && sneakHead.y == obstacleY && this.mazePenetrate == false){
 							this.alive = false;
 						}
 						//condition checks whether the snake's head does not have the same x and y as any other segment.
@@ -573,6 +575,10 @@
 										that.apple.scoreValue *= that.power.powerUnitValue;
 									} else {
 										actualPowerType.innerHTML = "Make the snake go through the elements of the maze for " + that.power.powerTimeValue + " seconds";
+										that.snake.mazePenetrate = true;
+										setTimeout(function(){
+											that.snake.mazePenetrate = false;
+										}, that.power.powerTimeValue);
 								}
 								}
 
@@ -650,7 +656,7 @@
 
 
 								//random selection of a power-up type
-								that.snake.powerType = Math.floor(Math.random() * 7);
+								that.snake.powerType = 6;
 								that.power.onBoard = true;
 								that.power.drawPower();
 							}
@@ -709,7 +715,6 @@
 											if(highscore !== null){
 											    if (that.score > highscore) {
 															highscore = that.score;
-															
 															var newItem = document.createElement("LI");
 															var textnode = document.createTextNode(that.score);
 															newItem.appendChild(textnode);
@@ -731,7 +736,6 @@
 													that.score = 0;
 													document.getElementById("score").innerHTML = that.score;
 											}
-										
 											info.style.display = "none";
 											parameters.style.display = "block";
 								}
