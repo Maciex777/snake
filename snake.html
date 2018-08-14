@@ -42,25 +42,18 @@
 		<div class="container">
 			<h1>Level <span id="level-heading">1</span></h1>
 			<canvas tabindex="0" width="500" height="500" id="canvas">
-
 			</canvas>
-
 			<div id="panel">
 				<h2>Your score: <span id="score">0</span></h2>
-
 				<div id="parameters">
 					<label for="level">Level:</label><br>
 					<input type="number" id="level" name="level" min="1" max="5" value="1"><br>
-
 					<label for="powerTime">Power-ups time:</label><br>
 					<input type="range" id="powerTime" name="powerTime" min="3000" step="1" max="10000" value="1000" onchange="setPowerTime(this.value);"><span id="powerTimeAmount">150</span><br>
-
 					<label for="powerUnit">Power-ups unit:</label><br>
 					<input type="number" id="powerUnit" name="powerUnit" min="1" max="5" value="1" onchange="setPowerUnits(this.value);"><br>
-
 					<label for="snakeSpeed">Snake speed:</label><br>
 					<input type="range" id="snakeSpeed" name="snakeSpeed" step="1" min="1" max="250" value="150" onchange="setSnakeSpeed(this.value);"><span id="speed">150</span><br><br>
-
 					<button onclick="init()">Start</button>
 				</div>
 				<div id="info-panel">
@@ -70,7 +63,7 @@
 					<h3>Snake length: <span id="actualSnakeLength">0</span></h3>
 					<h3>Point value: <span id="actualPointValue">0</span></h3>
 					<h3>Power-up type: <span id="actualPowerType">?</span></h3>
-					<button id="playAgain">Zagraj ponownie</button>
+					<button id="playAgain">Play again</button>
 				</div>
 			</div>
 			<div id="highscore-panel">
@@ -79,7 +72,6 @@
 			</div>
 		</div>
 		<script type="text/javascript">
-
 		var parameters = document.getElementById("parameters");
 		var info = document.getElementById("info-panel");
 		var playAgain = document.getElementById("playAgain")
@@ -100,18 +92,15 @@
 		var powerTimeValues = 5000;
 		//default power-up unit
 		var powerUnitValues = 1;
-
 		//setting power-up time by input onchange
 		function setPowerTime(powerTimeValue){
 			powerTimeValues = parseInt(powerTimeValue);
 			powerTimeAmount.innerHTML = powerTimeValues;
 		}
-
 		//setting power-up unit by input onchange
 		function setPowerUnits(powerUnitValue){
 			powerUnitValues = parseInt(powerUnitValue);
 		}
-
 		//setting snake speed by input onchange
 		function setSnakeSpeed(snakeSpeed){
 			snakeSpeeds = parseInt(snakeSpeed);
@@ -119,17 +108,12 @@
 			speed = snakeSpeeds;
 			speedAmount.innerHTML = speed;
 		}
-
 			function init(){
-
 				var canvas = document.querySelector("#canvas");
 				var ctx = canvas.getContext("2d");
-
 				canvas.focus();
-
 				var level = document.getElementById("level").value;
 				var scoreValue = 1;
-
 				//setting score points value and snake speed depending on level
 				if(level == 2){
 					canvas.setAttribute("width", "450");
@@ -172,9 +156,7 @@
 					canvas.setAttribute("width", "500");
 					canvas.setAttribute("height", "500");
 				}
-
 				// ---  OBSTACLE CONSTRUCTOR --- //
-
 				//The constructor accepts two arguments: pointers to the canvas element and its two-dimensional context
 				function Obstacle(ctx, canvas) {
 					//canvas – takes the parameter value, refers to the canvas element in the html document
@@ -189,15 +171,11 @@
 					this.x = 0;
 					//y – vartical position of the obstacle, in the constructor set to zero
 					this.y = 0;
-
-
 					//randomize method sets the x and y fields of the obstacle. Values are generated randomly. They can contain integers ranging from zero to the size of a canvas element divided by the size of the obstacle
 					this.randomize = function() {
 						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
 						this.y = Math.floor(Math.random() * (this.canvas.height/this.size));
 					};
-
-
 					//drawApple method draws an obstacle on the game board
 					this.drawObstacle = function() {
 						this.ctx.fillStyle = "grey";
@@ -207,10 +185,7 @@
 						this.ctx.closePath();
 					};
 				}
-
-
 				// ---  POWER-UP CONSTRUCTOR --- //
-
 				//The constructor accepts two arguments: pointers to the canvas element and its two-dimensional context
 				function Power(ctx, canvas) {
 					//canvas –  takes the parameter value, refers to the canvas element in the html document
@@ -234,13 +209,11 @@
 					//power-up unit
 					this.powerUnitValue = powerUnitValues;
 					actualPowerUnit.innerHTML = this.powerUnitValue;
-
 					//randomize method sets the x and y fields of the power-up. Values are generated randomly. They can contain integers ranging from zero to the size of a canvas element divided by the size of the power-up
 					this.randomize = function() {
 						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
 						this.y = Math.floor(Math.random() * (this.canvas.height/this.size));
 					};
-
 					//drawApple method draws the power-up on the game board
 					this.drawPower = function() {
 						this.ctx.fillStyle = "violet";
@@ -251,10 +224,7 @@
 						this.ctx.fillStyle = "black";
 					};
 				}
-
-
 				// ---  APPLE CONSTRUCTOR --- //
-
 				//The constructor accepts two arguments: pointers to the canvas element and its two-dimensional context
 				function Apple(ctx, canvas) {
 					//canvas –  takes the parameter value, refers to the canvas element in the html document
@@ -272,14 +242,11 @@
 					//scoreValue – the number of score points a player will receive for eating the apple
 					this.scoreValue = scoreValue;
 					actualPointValue.innerHTML = this.scoreValue;
-
-
 					//randomize method sets the x and y fields of the power-up. Values are generated randomly. They can contain integers ranging from zero to the size of a canvas element divided by the size of the power-up
 					this.randomize = function() {
 						this.x = Math.floor(Math.random() * (this.canvas.width/this.size));
 						this.y = Math.floor(Math.random() * (this.canvas.height/this.size));
 					};
-
 					//drawApple method draws the apple on the game board
 					this.drawApple = function() {
 						this.ctx.fillStyle = "green";
@@ -290,22 +257,18 @@
 						this.ctx.fillStyle = "black";
 					};
 				}
-
 				// ---  SNAKE CONSTRUCTOR --- //
-
 				function Snake(ctx, canvas) {
 					var that = this;
 					this.canvas = canvas;
 					this.ctx = ctx;
 					//speed – speed of the snake. This value will be used in the setInterval function
 					this.speed = speed;
-
 					actualSpeedAmount.innerHTML = this.speed;
 					//size – size of the side of one segment, from which the snake will be built.
 					this.size = 25;
 					//bodyParts – the number of segments the snake is made of at the moment.
 					this.bodyParts= 8;
-
 					actualSnakeLength.innerHTML = this.bodyParts;
 					//bodyPartsHolder – an array that stores all snake segments in the form of mini objects. These objects have two fields: x and y (the coordinates of a given segment on the board).
 					this.bodyPartsHolder = [];
@@ -319,8 +282,6 @@
 					this.eaten = false;
 					//charged –  set to true when the snake eats power-up
 					this.charged = false;
-
-
 					//initSnake method initializes the snake. Fills the bodyPartsHolder array with objects with appropriate values of half x and y.
 					//Also invokes the makeSnakeListen method.
 					this.initSnake = function(){
@@ -328,10 +289,7 @@
 						  this.bodyPartsHolder.push({x:i,y:0});
 						};
 						this.makeSnakeListen(window);
-
 					};
-
-
 					//updatePosition method updates the position of all snake segments.
 					//First, it raises or lowers the x or y value (depending on the current direction value) of the last element of the array ('snake head') by 1.
 					//It then updates the positions of all subsequent elements with those that have the element previously located.
@@ -354,7 +312,6 @@
 								this.bodyPartsHolder[this.bodyParts-1].y--;
 								break;
 						}
-
 						for(var i = this.bodyParts-2; i>=0;i--) {
 							tempx = this.bodyPartsHolder[i].x;
 							tempy = this.bodyPartsHolder[i].y;
@@ -364,8 +321,6 @@
 							prevY = tempy;
 						}
 					};
-
-
 					//makeSnakeListen method assigns to the object window eventListener onkeydown.
 					//Pressing any of the arrows changes the value of the direction field.
 					//Pressing the spacebar will change the value of the paused field to true, and will write the word "PAUSE" on the board in red letters.
@@ -406,15 +361,11 @@
 							}
 						};
 					};
-
-
 					//moveSnake method calls the drawSnake and updatePosition methods.
 					this.moveSnake = function(){
 						this.drawSnake();
 						this.updatePosition();
 					};
-
-
 					//drawSnake method iterates through the bodyPartsHolder array and draws all snake segments on the board, based on the x and y values of each element.
 					this.drawSnake = function(){
 						for(var i=0; i < this.bodyParts; i++) {
@@ -424,8 +375,6 @@
 							this.ctx.closePath();
 						};
 					};
-
-
 					//checkColissions method is called in the game object and takes two values: the current x and y of the apple.
 					this.checkColissions = function(appleX,appleY,obstacleX,obstacleY,powerX,powerY){
 						var sneakHead = this.bodyPartsHolder[this.bodyParts-1];
@@ -460,8 +409,6 @@
 							}
 						}
 					};
-
-
 					//grow method is called by the Game object when the snake eats an apple. it raises the value of the bodyParts field by 1.
 					//It also adds a new element to the beginning of the bodyPartsHolder array.
 					//x and y of the new element are set to -1 so that it does not appear on the board before the updatePosition method, does not place it at the end of the snake
@@ -469,15 +416,10 @@
 						this.bodyParts++;
 						this.bodyPartsHolder.unshift({x:-1,y:-1});
 						//update information about actual snake length
-
 					};
 				}
-
-
 				// ---  GAME CONSTRUCTOR --- //
-
 				function Game(canvas, ctx){
-
 					var levelHeading = document.getElementById("level-heading");
 					//check level and set heading
 					if(level == 2){
@@ -491,7 +433,6 @@
 					} else {
 							levelHeading.innerHTML = " 1";
 					}
-
 					var that = this;
 					this.canvas = canvas;
 					this.ctx = ctx;
@@ -512,16 +453,12 @@
 					this.obstacleCorrect = true;
 					//score – a field that stores the number of points that the player managed to get, initially set to zero.
 					this.score = 0;
-
-
 					//welcome method called by the init method when the state field is New.
 					//This method changes state to "playGame" and the init method is restarted.
 					this.welcome = function() {
 						that.state = "PlayGame";
 						that.init();
 					};
-
-
 					//activateGame method first initializes the snake by calling the Snake object method - initSnake and then sets setInterval.
 					this.activateGame = function() {
 						this.snake.initSnake();
@@ -536,7 +473,6 @@
 								that.snake.eaten = false;
 								that.power.eatenPower = false;
 							}
-
 							//the method checks if the snake has eaten a power-up
 							if(that.snake.charged){
 								that.power.onBoard = false;
@@ -575,14 +511,12 @@
 										actualPowerType.innerHTML = "Make the snake go through the elements of the maze for " + that.power.powerTimeValue + " seconds";
 								}
 								}
-
 								that.power.eatenPower = true;
 							}
 							//clearing the canvas element, provided that the game is not currently paused
 							if(that.snake.paused != true){
 								that.ctx.clearRect(0,0,that.canvas.width,that.canvas.height);
 							};
-
 							//if there is an obstacle on the board, the method of the Obstacle object - drawObstacle is called.
 							//If the obstacle is not there, a new position is drawn (until it coincides with the position of the snake), after which the obstacle is placed on the board and drawn
 							if(that.obstacle.onBoard) {
@@ -598,11 +532,9 @@
 								}
 							}
 						} while(!(that.obstacleCorrect));
-
 						that.obstacle.onBoard = true;
 						that.obstacle.drawObstacle();
 						}
-
 							//if there is an apple on the board, the method of the Apple object - drawApple is called.
 							//If the apple is not there, a new position is drawn (until it coincides with the position of the snake and the obstacle), after which the apple is placed on the board and drawn
 							if(that.apple.onBoard) {
@@ -622,12 +554,9 @@
 										}
 									}
 								} while(!(that.appleCorrect));
-
 								that.apple.onBoard = true;
 								that.apple.drawApple();
 							}
-
-
 							//if there is an power-up on the board, the method of the Power object - drawPower is called.
 							//If the power-up is not there and number of score is divisible by score points values multiple by 4, a new position is drawn (until it coincides with the position of the snake and the obstacle), after which the power-up is placed on the board and drawn
 							if(that.power.onBoard && that.power.eatenPower == false) {
@@ -647,14 +576,11 @@
 										}
 									}
 								} while(!(that.powerCorrect));
-
-
 								//random selection of a power-up type
 								that.snake.powerType = Math.floor(Math.random() * 7);
 								that.power.onBoard = true;
 								that.power.drawPower();
 							}
-
 							//checking if the field of the Snake - alive object is true.
 							//If yes and the game is not paused, then it is drawn and updated as usual.
 							//If the alive field is false, the program changes the value of the state field to "gameLost", puts a sad message on the screen and starts the init method again.
@@ -684,7 +610,6 @@
 					//init method supports the appropriate game states and, depending on the value of the state field, calls the appropriate methods.
 					//If the state is equal to "gameLost", this function resets all settings to prepare the game for a new batch.
 					this.init = function() {
-
 						 info.style.display = "block";
 						 parameters.style.display = "none";
 						switch(this.state){
@@ -695,7 +620,6 @@
 								this.activateGame();
 								break;
 							case "GameLost":
-
 								playAgain.onclick = function(){
 											that.ctx.clearRect(0,0,that.canvas.width,that.canvas.height);
 											that.snake = null;
@@ -704,45 +628,39 @@
 											that.power = new Power(that.ctx, that.canvas);
 											that.obstacle = new Obstacle(that.ctx, that.canvas);
 											that.state = "New";
-
 											//save highscores
 											if(highscore !== null){
 											    if (that.score > highscore) {
-															highscore.innerHTML = that.score;
+															highscore = that.score;
+															console.log(highscore);
 															var newItem = document.createElement("LI");
 															var textnode = document.createTextNode(that.score);
 															newItem.appendChild(textnode);
 															highscores.insertBefore(newItem, highscores.childNodes[0]);
-
 															var h=0, itemCount = 0;
 															while(highscores.getElementsByTagName('li') [h++]) itemCount++;
 															//save only 5 best scores
 															if(itemCount > 5){
 																	highscores.removeChild(highscores.lastChild);
 															}
-
 															that.score = 0;
 															document.getElementById("score").innerHTML = that.score;
 											    }
 											}
 											else{
-											    localStorage.setItem("highscore", that.score);
 													that.score = 0;
 													document.getElementById("score").innerHTML = that.score;
 											}
-
+											console.log(highscore);
 											info.style.display = "none";
 											parameters.style.display = "block";
 								}
-
 								break;
 						}
 					};
 				};
-
 				var gra = new Game(canvas, ctx);
 				gra.init();
-
 			}
 		</script>
 	</body>
