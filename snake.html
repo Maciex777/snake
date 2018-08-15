@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Snake</title>
+		<meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	  <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <link href="./style.css" rel="stylesheet" type="text/css">
+	</head>
+	<body>
+		<div class="container">
+			<h1>Level <span id="level-heading">1</span></h1>
+			<canvas tabindex="0" width="500" height="500" id="canvas">
+			</canvas>
+
+			<div id="panel">
+				<h2>Your score: <span id="score">0</span></h2>
+
+				<div id="parameters">
+					<label for="level">Level:</label><br>
+					<input type="number" id="level" name="level" min="1" max="5" value="1"><br>
+
+					<label for="powerTime">Power-ups time:</label><br>
+					<input type="range" id="powerTime" name="powerTime" min="3000" step="1" max="10000" value="1000" onchange="setPowerTime(this.value);"><span id="powerTimeAmount">150</span><br>
+
+					<label for="powerUnit">Power-ups unit:</label><br>
+					<input type="number" id="powerUnit" name="powerUnit" min="1" max="5" value="1" onchange="setPowerUnits(this.value);"><br>
+
+					<label for="snakeSpeed">Snake speed:</label><br>
+					<input type="range" id="snakeSpeed" name="snakeSpeed" step="1" min="1" max="250" value="150" onchange="setSnakeSpeed(this.value);"><span id="speed">150</span><br><br>
+
+					<button onclick="init()">Start</button>
+				</div>
+				<div id="info-panel">
+					<h3>Power-ups time: <span id="actualPowerTime">0</span></h3>
+					<h3>Power-ups unit: <span id="actualPowerUnit">0</span></h3>
+					<h3>Snake speed: <span id="actualSnakeSpeed">0</span></h3>
+					<h3>Snake length: <span id="actualSnakeLength">0</span></h3>
+					<h3>Point value: <span id="actualPointValue">0</span></h3>
+					<h3>Power-up type: <span id="actualPowerType">?</span></h3>
+					<button id="playAgain">Play again</button>
+				</div>
+			</div>
+			<div id="highscore-panel">
+				<h4>Best scores:</h4>
+				<ul id="highscores"></ul>
+			</div>
+		</div>
+    <script type="text/javascript" src="./snake.js"></script>
+    </body>
+</html>
